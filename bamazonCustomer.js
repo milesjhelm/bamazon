@@ -20,6 +20,28 @@ connection.connect(function(err) {
 });
 
 
+
+
+var placeOrder = function() {
+  console.log("Place an order:\n")
+  inquirer.prompt([
+    {
+      name: "item",
+      message: "What is the Item ID of the product you would like to order?"
+    }, {
+      name: "quantity",
+      message: "How many would you like to order?"
+    } 
+  ]).then(function(answers) {
+    // initializes the variable newguy to be a programmer object which will take
+    // in all of the user's answers to the questions above
+    console.log(answers.item + answers.quantity);
+    // printInfo method is run to show that the newguy object was successfully created and filled
+  });
+};
+
+
+
 var start = function() {
   console.log("The following items are available in the bamazon inventory:\n");
   // query the database for all items for sale
@@ -32,12 +54,14 @@ var start = function() {
         + " Department: " + results[i].department_name + " Price: " + results[i].price 
         + " Stock Quantity: " + results[i].stock_quantity);
      }
+
+    placeOrder();
    });
 
 
-
-
 };
+
+
 
 // run the start function when the file is loaded to prompt the user
 start();
