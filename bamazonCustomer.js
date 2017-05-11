@@ -21,7 +21,7 @@ connection.connect(function(err) {
 
 
 
-
+// User places order
 var placeOrder = function() {
   console.log("Place an order:\n")
   inquirer.prompt([
@@ -33,18 +33,41 @@ var placeOrder = function() {
       message: "How many would you like to order?"
     } 
   ]).then(function(answers) {
-    // initializes the variable newguy to be a programmer object which will take
-    // in all of the user's answers to the questions above
-    console.log(answers.item + answers.quantity);
-    // printInfo method is run to show that the newguy object was successfully created and filled
+
+    connection.query("SELECT * FROM products WHERE ?", {
+      item_id: answers.item
+    }, function(err, res) {
+      //If there is enough stock of the requested product, subtract
+      // console.log("quantity is " + res[0].stock_quantity)
+      var new_quantity = res[0].stock_quantity - answers.quantity
+      if (new_quantity >= 0 ) {
+        // console.log(new_quantity);
+
+        connection.query("UPDATE products SET ? WHERE ?", [{
+          stock_quantity: new_quantity
+        }, {
+          item_id: answers.item
+        }], function(err, res) {
+          if (err) throw err;
+          console.log("\nOrder successfully placed.\n");
+          start();
+        });
+
+      } else {
+        console.log("\nNot enough is in stock to complete your order.\n\n");
+        start();
+      }
+
+    });
+
   });
 };
 
 
-
+// First function to execute. Lists contents of database. Calls placeOrder()
 var start = function() {
   console.log("The following items are available in the bamazon inventory:\n");
-  // query the database for all items for sale
+  // query the database for all items in bamazon
   connection.query("SELECT * FROM products", function(err, results) {
     if (err) throw err;
      // once you have the items, prompt the user for which they'd like to buy and quantity
@@ -61,9 +84,7 @@ var start = function() {
 
 };
 
-
-
-// run the start function when the file is loaded to prompt the user
+//Call the start function to get things going. This function is called elsewhere, as well.
 start();
 
 
